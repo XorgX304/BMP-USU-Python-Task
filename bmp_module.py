@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 import sys
 
 # Некоторые необходимые константы
@@ -657,9 +657,10 @@ class BITMAPINFOHEADER:
             print('Struct type not found')
             exit(-2)
 
+
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('python bmp.py file_name.bmp')
+        print('python bmp_module.py file_name.bmp')
         exit(-3)
     try:
         fin = open(sys.argv[1], 'rb')
