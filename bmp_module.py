@@ -113,10 +113,10 @@ class RGBQUAD:
 class CIEXYZTRIPLE:
     """Струтура, хранящая тройку CIEXYZ
     """
-    def __init__(self, _ciexyzX, _ciexyzY, _ciexyzZ):
-        self.ciexyzX = x
-        self.ciexyzY = y
-        self.ciexyzZ = z
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
 
 
 # Определение структур для работы с BMP-изображением
@@ -614,9 +614,9 @@ class BITMAPINFOHEADER:
             'BlueMask: {BlueMask}\n' \
             'AlphaMask: {AlphaMask}\n' \
             'CSType: {CSType}\n' \
-            'Endpoints: {x1}\t{y1}\t{z1}' \
-            '           {x2}\t{y2}\t{z2}' \
-            '           {x3}\t{y3}\t{z3}' \
+            'Endpoints: {x1}\t{y1}\t{z1}\n' \
+            '           {x2}\t{y2}\t{z2}\n' \
+            '           {x3}\t{y3}\t{z3}\n' \
             'GammaRed: {GammaRed}\n' \
             'GammaGreen: {GammaGreen}\n' \
             'GammaBlue: {GammaBlue}\n'.format(
@@ -636,7 +636,7 @@ class BITMAPINFOHEADER:
                 z3=self.Endpoints.z.z,
                 GammaRed=self.GammaRed,
                 GammaGreen=self.GammaGreen,
-                GammaBlue=slef.GammaBlue
+                GammaBlue=self.GammaBlue
             )
         if self.type_of_struct == 'BITMAPV4HEADER':
             return info_str

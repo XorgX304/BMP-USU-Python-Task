@@ -4,7 +4,7 @@ import sys
 import bmp_module
 
 
-class GUI_Info_FileHeader(QWidget):
+class GUIInfoFileHeader(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -31,7 +31,7 @@ class GUI_Info_FileHeader(QWidget):
         self.off_bits.setText(hex(bmp_obj.BMFileHeader.OffBits))
 
 
-class GUI_Info_BitMapCoreHeader(QWidget):
+class GUIInfoBitMapCoreHeader(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -58,7 +58,7 @@ class GUI_Info_BitMapCoreHeader(QWidget):
         self.bit_count.setText(str(bmp_obj.BMInfo.Header.BitCount))
 
 
-class GUI_Info_BitMapInfoHeader(QWidget):
+class GUIInfoBitMapInfoHeader(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -88,7 +88,7 @@ class GUI_Info_BitMapInfoHeader(QWidget):
         self.clr_important.setText(str(bmp_obj.BMInfo.Header.ClrImportant))
 
 
-class GUI_Info_BitMapV4Header(QWidget):
+class GUIInfoBitMapV4Header(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -116,10 +116,10 @@ class GUI_Info_BitMapV4Header(QWidget):
     def set_fields(self, bmp_obj):
         assert type(bmp_obj) == bmp_module.BMPIMAGE
 
-        self.red_mask.setText(str(bmp_obj.BMInfo.Header.RedMask))
-        self.green_mask.setText(str(bmp_obj.BMInfo.Header.GreenMask))
-        self.blue_mask.setText(str(bmp_obj.BMInfo.Header.BlueMask))
-        self.alpha_mask.setText(str(bmp_obj.BMInfo.Header.AlphaMask))
+        self.red_mask.setText(hex(bmp_obj.BMInfo.Header.RedMask))
+        self.green_mask.setText(hex(bmp_obj.BMInfo.Header.GreenMask))
+        self.blue_mask.setText(hex(bmp_obj.BMInfo.Header.BlueMask))
+        self.alpha_mask.setText(hex(bmp_obj.BMInfo.Header.AlphaMask))
         self.cs_type.setText(str(bmp_obj.BMInfo.Header.CSType))
         self.endpoints.setText(str(bmp_obj.BMInfo.Header.Endpoints))
         self.gamma_red.setText(str(bmp_obj.BMInfo.Header.GammaRed))
@@ -127,7 +127,7 @@ class GUI_Info_BitMapV4Header(QWidget):
         self.gamma_blue.setText(str(bmp_obj.BMInfo.Header.GammaBlue))
 
 
-class GUI_Info_BitMapV5Header(QWidget):
+class GUIInfoBitMapV5Header(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -151,7 +151,7 @@ class GUI_Info_BitMapV5Header(QWidget):
         self.reserved.setText(str(bmp_obj.BMInfo.Header.Reserved))
 
 
-class GUI_ImageView(QWidget):
+class GUIImageView(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -171,33 +171,36 @@ class GUI_ImageView(QWidget):
                     j,
                     i,
                     bmp_module.color_from_tuple(
-                        bmp.PixelData[i][j]
+                        bmp_obj.PixelData[i][j]
                     )
                 )
         self.view.setPixmap(QPixmap(self.image))
+        self.adjustSize()
 
     def unset_image(self):
         self.image = None
-        self.setPixmap(QPixmap(self.image))
+        self.view.setPixmap(QPixmap(self.image))
 
     def resizeEvent(self, event):
-        w = event.size().width()
-        h = event.size().height()
-        width = self.image.width()
-        height = self.image.height()
-        if w / h < width / height:
-            new_w = w
-            new_h = int(w / width * height)
-        else:
-            new_w = int(h / height * width)
-            new_h = h
-        self.view.setPixmap(
-            QPixmap.fromImage(self.image).scaled(
-                new_w,
-                new_h
+        if self.image:
+            w = event.size().width()
+            h = event.size().height()
+            width = self.image.width()
+            height = self.image.height()
+            if w / h < width / height:
+                new_w = w
+                new_h = int(w / width * height)
+            else:
+                new_w = int(h / height * width)
+                new_h = h
+            self.view.setPixmap(
+                QPixmap.fromImage(self.image).scaled(
+                    new_w,
+                    new_h
+                )
             )
-        )
-        self.view.adjustSize()
+            self.view.adjustSize()
+
 
 class GUI(QWidget):
 
@@ -210,30 +213,29 @@ class GUI(QWidget):
         self.tabs.setFixedWidth(350)
         self.tabs.setMinimumHeight(400)
 
-        self.file_header = GUI_Info_FileHeader()
+        self.file_header = GUIInfoFileHeader()
         self.tabs.addTab(self.file_header, "FileHeader")
-        self.bit_map_core_header = GUI_Info_BitMapCoreHeader()
+        self.bit_map_core_header = GUIInfoBitMapCoreHeader()
         self.tabs.addTab(self.bit_map_core_header, "BitMapCoreHeader")
-        self.bit_map_info_header = GUI_Info_BitMapInfoHeader()
+        self.bit_map_info_header = GUIInfoBitMapInfoHeader()
         self.tabs.addTab(self.bit_map_info_header, "BitMapInfoHeader")
-        self.bit_map_v4_header = GUI_Info_BitMapV4Header()
+        self.bit_map_v4_header = GUIInfoBitMapV4Header()
         self.tabs.addTab(self.bit_map_v4_header, "BitMapV4Header")
-        self.bit_map_v5_header = GUI_Info_BitMapV5Header()
+        self.bit_map_v5_header = GUIInfoBitMapV5Header()
         self.tabs.addTab(self.bit_map_v5_header, "BitMapV5Header")
 
-        self.view = GUI_ImageView()
+        self.view = GUIImageView()
 
         layout.addWidget(self.view, 0, 0)
         layout.addWidget(self.tabs, 0, 1)
 
-        self.disable_all_dabs()
+        self.disable_all_tabs()
 
-    def disable_all_dabs(self):
+    def disable_all_tabs(self):
         for i in range(0, 5):
             self.tabs.setTabEnabled(i, False)
 
     def set_all_fields(self, bmp_obj):
-        self.disable_all_dabs()
         self.tabs.setTabEnabled(0, True)
         self.file_header.set_fields(bmp_obj)
 
@@ -248,17 +250,58 @@ class GUI(QWidget):
         if bmp_obj.BMInfo.Header.Size > 108:
             self.tabs.setTabEnabled(4, True)
             self.bit_map_v5_header.set_fields(bmp_obj)
+
+
+    def init_image(self, bmp_obj):
+        self.disable_all_tabs()
+        self.set_all_fields(bmp_obj)
         self.view.set_image(bmp_obj)
+
+    def close_image(self):
+        self.disable_all_tabs()
+        self.view.unset_image()
+
+
+class GUIMainWindow(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+        self.gui = GUI()
+        self.setCentralWidget(self.gui)
+
+        file_menu = self.menuBar().addMenu("File")
+        open_action = QAction("Open", self)
+        open_action.triggered.connect(self.open_file)
+        open_action.setShortcuts(QKeySequence.Open)
+        file_menu.addAction(open_action)
+        close_action = QAction("Close", self)
+        close_action.triggered.connect(self.close_file)
+        close_action.setShortcuts(QKeySequence.Close)
+        file_menu.addAction(close_action)
+        quit_action = QAction("Quit", self)
+        quit_action.triggered.connect(QApplication.exit)
+        quit_action.setShortcuts(QKeySequence.Quit)
+        file_menu.addAction(quit_action)
+
+    def open_file(self):
+        file_name, file_type = QFileDialog.getOpenFileName(
+            self,
+            'Load BMP', '',
+            'BMP file (*.bmp)'
+        )
+        if file_name:
+            bmp_file = open(file_name, 'rb')
+            bmp_obj = bmp_module.BMPIMAGE(bmp_file)
+            self.gui.init_image(bmp_obj)
+
+    def close_file(self):
+        self.gui.close_image()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    fin = open('input02.bmp', 'rb')
-    bmp = bmp_module.BMPIMAGE(fin)
-
-    info = GUI()
-    info.set_all_fields(bmp)
+    info = GUIMainWindow()
     info.show()
 
     app.exec()
