@@ -191,37 +191,30 @@ class BMPIMAGE:
         return bitmap
 
     def get_pixel_data_16bit(self, bmp_file):
-        """Ф-я считывает из файла двухмерный массив пикселей
-        для 16 битных изображений без RLE-сжатия
-        """
-        bitmap = list()
-        # устанавливаем позицию массива пикселей
-        bmp_file.seek(self.BMFileHeader.OffBits)
-        height = self.BMInfo.Header.Height
-        width = self.BMInfo.Header.Width
-        for i in range(height):
-            bitmap.append(list())
-            for j in range(width):
-                rgb = read_WORD(bmp_file)
-                red = convert((rgb & BMP_16BIT_RED_MASK) >> 10, 5, 8)
-                green = convert((rgb & BMP_16BIT_GREEN_MASK) >> 5, 5, 8)
-                blue = convert(rgb & BMP_16BIT_BLUE_MASK, 5, 8)
-                # print(rgb, red, green, blue)
-                bitmap[i].append((red, green, blue))
-            # считываем лишние байты, т.к. строки в массиве
-            # пикселей выравнивются до кратности 4-ем
-            bytes_count = 2 * width
-            if bytes_count % 4 != 0:
-                for j in range(4 - bytes_count % 4):
-                    read_BYTE(bmp_file)
-        if self.BMInfo.Header.reversed:
-            bitmap.reverse()
+        bitmap = self.get_pixel_data_16_32bit(
+            bmp_file,
+            BMP_16BIT_RED_MASK,
+            BMP_16BIT_GREEN_MASK,
+            BMP_16BIT_BLUE_MASK,
+            2
+        )
         return bitmap
 
     def get_pixel_data_32bit(self, bmp_file):
+        bitmap = self.get_pixel_data_16_32bit(
+            bmp_file,
+            BMP_32BIT_RED_MASK,
+            BMP_32BIT_GREEN_MASK,
+            BMP_32BIT_BLUE_MASK,
+            4
+        )
+        return bitmap
+
+    def get_pixel_data_16_32bit(self, bmp_file, r_mask, g_mask, b_mask,
+                                bytes_per_pixel):
         """
         Ф-я считывает из файла двухмерный массив пикселей
-        для 32 битных изображений без RLE-сжатия
+        для 16/32 битных изображений без RLE-сжатия
         """
         bitmap = list()
         # устанавливаем позицию массива пикселей
@@ -231,12 +224,14 @@ class BMPIMAGE:
         for i in range(height):
             bitmap.append(list())
             for j in range(width):
-                rgb = read_DWORD(bmp_file)
-                red = (rgb & BMP_32BIT_RED_MASK) >> 16
-                green = (rgb & BMP_32BIT_GREEN_MASK) >> 8
-                blue = rgb & BMP_32BIT_BLUE_MASK
-                # print(rgb, red, green, blue)
+                rgb = read_int_from_file(bmp_file, bytes_per_pixel)
+                red = (rgb & r_mask) >> 16
+                green = (rgb & g_mask) >> 8
+                blue = rgb & b_mask
                 bitmap[i].append((red, green, blue))
+            bytes_count = bytes_per_pixel * width
+            if bytes_count % 4 != 0:
+                read_DWORD(bmp_file)
         if self.BMInfo.Header.reversed:
             bitmap.reverse()
         return bitmap
