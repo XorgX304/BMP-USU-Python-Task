@@ -251,7 +251,6 @@ class GUI(QWidget):
             self.tabs.setTabEnabled(4, True)
             self.bit_map_v5_header.set_fields(bmp_obj)
 
-
     def init_image(self, bmp_obj):
         self.disable_all_tabs()
         self.set_all_fields(bmp_obj)
