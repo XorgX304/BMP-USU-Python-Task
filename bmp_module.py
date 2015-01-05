@@ -4,6 +4,12 @@ import sys
 
 # Некоторые необходимые константы
 
+BMP_32BIT_BLUE_MASK = 0x000000ff
+BMP_32BIT_GREEN_MASK = 0x0000ff00
+BMP_32BIT_RED_MASK = 0x00ff0000
+BMP_16BIT_BLUE_MASK = 0x001f
+BMP_16BIT_GREEN_MASK = 0x03e0
+BMP_16BIT_RED_MASK = 0x7c00
 BI_RGB = 0
 BI_RLE8 = 1
 BI_RLE4 = 2
@@ -197,9 +203,9 @@ class BMPIMAGE:
             bitmap.append(list())
             for j in range(width):
                 rgb = read_WORD(bmp_file)
-                red = convert((rgb & 0x7c00) >> 10, 5, 8)
-                green = convert((rgb & 0x03e0) >> 5, 5, 8)
-                blue = convert(rgb & 0x001f, 5, 8)
+                red = convert((rgb & BMP_16BIT_RED_MASK) >> 10, 5, 8)
+                green = convert((rgb & BMP_16BIT_GREEN_MASK) >> 5, 5, 8)
+                blue = convert(rgb & BMP_16BIT_BLUE_MASK, 5, 8)
                 # print(rgb, red, green, blue)
                 bitmap[i].append((red, green, blue))
             # считываем лишние байты, т.к. строки в массиве
@@ -226,9 +232,9 @@ class BMPIMAGE:
             bitmap.append(list())
             for j in range(width):
                 rgb = read_DWORD(bmp_file)
-                red = (rgb & 0x00ff0000) >> 16
-                green = (rgb & 0x0000ff00) >> 8
-                blue = rgb & 0x000000ff
+                red = (rgb & BMP_32BIT_RED_MASK) >> 16
+                green = (rgb & BMP_32BIT_GREEN_MASK) >> 8
+                blue = rgb & BMP_32BIT_BLUE_MASK
                 # print(rgb, red, green, blue)
                 bitmap[i].append((red, green, blue))
         if self.BMInfo.Header.reversed:
