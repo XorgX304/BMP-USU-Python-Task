@@ -196,7 +196,7 @@ class BMPIMAGE:
             BMP_16BIT_RED_MASK,
             BMP_16BIT_GREEN_MASK,
             BMP_16BIT_BLUE_MASK,
-            2
+            2, 5
         )
         return bitmap
 
@@ -206,12 +206,12 @@ class BMPIMAGE:
             BMP_32BIT_RED_MASK,
             BMP_32BIT_GREEN_MASK,
             BMP_32BIT_BLUE_MASK,
-            4
+            4, 8
         )
         return bitmap
 
     def get_pixel_data_16_32bit(self, bmp_file, r_mask, g_mask, b_mask,
-                                bytes_per_pixel):
+                                bytes_per_pixel, bits_per_color):
         """
         Ф-я считывает из файла двухмерный массив пикселей
         для 16/32 битных изображений без RLE-сжатия
@@ -225,9 +225,12 @@ class BMPIMAGE:
             bitmap.append(list())
             for j in range(width):
                 rgb = read_int_from_file(bmp_file, bytes_per_pixel)
-                red = (rgb & r_mask) >> 16
-                green = (rgb & g_mask) >> 8
+                red = (rgb & r_mask) >> 2 * bits_per_color
+                green = (rgb & g_mask) >> bits_per_color
                 blue = rgb & b_mask
+                red = convert(red, bits_per_color, 8)
+                green = convert(green, bits_per_color, 8)
+                blue = convert(blue, bits_per_color, 8)
                 bitmap[i].append((red, green, blue))
             bytes_count = bytes_per_pixel * width
             if bytes_count % 4 != 0:
